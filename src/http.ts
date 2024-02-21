@@ -1,6 +1,7 @@
 import { Config } from './config'
 import LoLInstance from './'
 import https from 'node:https'
+import http from 'node:http'
 import { InstanceStatus } from '@companion-module/base'
 import { convertObjectValues } from './utils'
 
@@ -8,15 +9,19 @@ type ReplayAPIPaths = 'replay/playback' | 'replay/render'
 export class ReplayService {
 	private instance: LoLInstance
 	private ip: string
+	private port: number
+	private request: typeof https | typeof http
 	constructor(instance: LoLInstance, config: Config) {
 		this.ip = config.host
+		this.port = config.port
+		this.request = config.ssl ? https : http
 		this.instance = instance
 	}
 
 	async get(path: ReplayAPIPaths): Promise<Render | Playback | void> {
 		const options = {
 			hostname: this.ip,
-			port: 2999,
+			port: this.port,
 			path: '/' + path,
 			rejectUnauthorized: false,
 			headers: { 'Content-Type': 'application/json' },
@@ -25,7 +30,7 @@ export class ReplayService {
 		return new Promise((resolve, reject) => {
 			let all_data = ''
 			const startTime = Date.now() // Record the start time
-			const req = https.get(options, (res) => {
+			const req = this.request.get(options, (res) => {
 				res.setEncoding('utf8')
 				res.on('data', (d) => {
 					all_data += d
@@ -60,7 +65,7 @@ export class ReplayService {
 		const body = JSON.stringify(convertObjectValues(data))
 		const options = {
 			hostname: this.ip,
-			port: 2999,
+			port: this.port,
 			path: '/' + path,
 			rejectUnauthorized: false,
 			method: 'POST',
@@ -71,7 +76,7 @@ export class ReplayService {
 		}
 		return new Promise((resolve, reject) => {
 			let all_data = ''
-			const req = https.request(options, (res) => {
+			const req = this.request.request(options, (res) => {
 				res.setEncoding('utf8')
 				res.on('data', (d) => {
 					all_data += d
