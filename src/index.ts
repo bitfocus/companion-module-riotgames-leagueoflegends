@@ -41,15 +41,25 @@ class LoLInstance extends InstanceBase<Config> {
 		}, this.config.apiPollingInterval)
 	}
 
+	private isValidIP(ip: string): boolean {
+		const ipRegex = new RegExp(
+			'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$',
+		)
+		return ipRegex.test(ip)
+	}
+
+	private async fetchData(path: 'replay/render' | 'replay/playback'): Promise<void> {
+		const data = await this.lolreplay!.get(path)
+		if (data) this.variables?.UpdateVariable(data)
+	}
+
 	async connectAPI(): Promise<void> {
 		if (!this.lolreplay) {
 			this.updateStatus(InstanceStatus.UnknownWarning, 'Replay service not initialized')
 			this.apiInterval && clearIntervalAsync(this.apiInterval)
 		} else {
-			const renderData = await this.lolreplay.get('replay/render')
-			if (renderData) this.variables?.UpdateVariable(renderData)
-			const playbackData = await this.lolreplay.get('replay/playback')
-			if (playbackData) this.variables?.UpdateVariable(playbackData)
+			await this.fetchData('replay/render')
+			await this.fetchData('replay/playback')
 		}
 	}
 
@@ -70,13 +80,9 @@ class LoLInstance extends InstanceBase<Config> {
 		this.variables?.UpdateVariableDefinitions()
 		this.actions?.UpdateActionDefinitions()
 
-		const ipRegex = new RegExp(
-			'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$',
-		)
 		if (this.apiInterval) clearIntervalAsync(this.apiInterval)
-		if (!ipRegex.test(this.config.host)) {
+		if (!this.isValidIP(this.config.host)) {
 			this.updateStatus(InstanceStatus.BadConfig, 'Invalid IP')
-			this.log('error', `Invalid IP: ${this.config.host}, Test result: ${!ipRegex.test(this.config.host)}`)
 			return
 		}
 		this.log('debug', 'Connecting to LoL Replay API')
