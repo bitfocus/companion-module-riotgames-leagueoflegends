@@ -36,27 +36,21 @@ class LoLInstance extends InstanceBase<Config> {
 	}
 
 	public async initializeInterval(): Promise<void> {
-		const ipRegex = new RegExp(
-			'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$',
-		)
-		if (this.apiInterval) clearIntervalAsync(this.apiInterval)
-		if (!ipRegex.test(this.config.host)) {
-			this.updateStatus(InstanceStatus.BadConfig, 'Invalid IP')
-			this.log('error', `Invalid IP: ${this.config.host}, Test result: ${!ipRegex.test(this.config.host)}`)
-			return
-		}
-		this.log('debug', 'Connecting to LoL Replay API')
 		this.apiInterval = setIntervalAsync(async () => {
-			if (!this.lolreplay) {
-				this.updateStatus(InstanceStatus.UnknownWarning, 'Replay service not initialized')
-				this.apiInterval && clearIntervalAsync(this.apiInterval)
-			} else {
-				const renderData = await this.lolreplay.get('replay/render')
-				if (renderData) this.variables?.UpdateVariable(renderData)
-				const playbackData = await this.lolreplay.get('replay/playback')
-				if (playbackData) this.variables?.UpdateVariable(playbackData)
-			}
+			await this.connectAPI()
 		}, this.config.apiPollingInterval)
+	}
+
+	async connectAPI(): Promise<void> {
+		if (!this.lolreplay) {
+			this.updateStatus(InstanceStatus.UnknownWarning, 'Replay service not initialized')
+			this.apiInterval && clearIntervalAsync(this.apiInterval)
+		} else {
+			const renderData = await this.lolreplay.get('replay/render')
+			if (renderData) this.variables?.UpdateVariable(renderData)
+			const playbackData = await this.lolreplay.get('replay/playback')
+			if (playbackData) this.variables?.UpdateVariable(playbackData)
+		}
 	}
 
 	/**
@@ -75,8 +69,24 @@ class LoLInstance extends InstanceBase<Config> {
 	private updateInstance(): void {
 		this.variables?.UpdateVariableDefinitions()
 		this.actions?.UpdateActionDefinitions()
-		this.initializeInterval()
-		return
+
+		const ipRegex = new RegExp(
+			'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$',
+		)
+		if (this.apiInterval) clearIntervalAsync(this.apiInterval)
+		if (!ipRegex.test(this.config.host)) {
+			this.updateStatus(InstanceStatus.BadConfig, 'Invalid IP')
+			this.log('error', `Invalid IP: ${this.config.host}, Test result: ${!ipRegex.test(this.config.host)}`)
+			return
+		}
+		this.log('debug', 'Connecting to LoL Replay API')
+		if (
+			!this.config.apiPollingInterval ||
+			this.config.apiPollingInterval === 0 ||
+			this.config.apiPollingInterval < 100
+		) {
+			this.connectAPI()
+		} else this.initializeInterval()
 	}
 }
 

@@ -56,10 +56,10 @@ export const getConfigFields = (): SomeCompanionConfigField[] => {
 		{
 			type: 'number',
 			id: 'apiPollingInterval',
-			label: 'API Polling interval (ms) (default: 250, min: 100)',
+			label: 'API Polling interval (ms) (default: 250, min: 100, 0 for disabled)',
 			width: 12,
 			default: 250,
-			min: 100,
+			min: 0,
 			max: 10000,
 		},
 	]
