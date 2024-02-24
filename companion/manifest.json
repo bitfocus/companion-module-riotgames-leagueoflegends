@@ -5,8 +5,8 @@
 	"description": "Module to control League of Legends",
 	"version": "0.0.0",
 	"license": "MIT",
-	"repository": "git+https://github.com/bitfocus/companion-module-your-module-name.git",
-	"bugs": "https://github.com/bitfocus/companion-module-your-module-name/issues",
+	"repository": "git+https://github.com/bitfocus/companion-module-riotgames-leagueoflegends.git",
+	"bugs": "https://github.com/bitfocus/companion-module-riotgames-leagueoflegends/issues",
 	"maintainers": [
 		{
 			"name": "Cynthia Ebert",
