@@ -26,7 +26,7 @@ class LoLInstance extends InstanceBase<Config> {
 		this.log('debug', `Process ID: ${process.pid}`)
 		this.lolreplay = new ReplayService(this, config)
 		this.variables = new Variables(this)
-		this.actions = new Actions(this, this.lolreplay)
+		this.actions = new Actions(this, this.lolreplay, this.variables)
 		this.updateInstance()
 	}
 
