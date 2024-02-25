@@ -8,8 +8,8 @@ import { ReplayService } from './http'
 export class Actions {
 	private readonly instance: LoLInstance
 	public actions: CompanionActionDefinitions = {}
-	private replayapi: ReplayService
-	private variables: Variables
+	private readonly replayapi: ReplayService
+	private readonly variables: Variables
 
 	constructor(instance: LoLInstance, api: ReplayService, variables: Variables) {
 		this.instance = instance
@@ -17,9 +17,10 @@ export class Actions {
 		this.variables = variables
 
 		this.createRenderActions()
+		this.createPlaybackActions()
 	}
 
-	createOptions(type: string, value: string | number | boolean): SomeCompanionActionInputField[] {
+	private createOptions(type: string, value: string | number | boolean): SomeCompanionActionInputField[] {
 		switch (type) {
 			case 'number':
 				return [
@@ -60,7 +61,11 @@ export class Actions {
 		}
 	}
 
-	createAction(key: string, value: string | number | boolean, endpoint: 'replay/render' | 'replay/playback'): void {
+	private createAction(
+		key: string,
+		value: string | number | boolean,
+		endpoint: 'replay/render' | 'replay/playback',
+	): void {
 		const actionId = camelCaseToSnakeCase(key)
 		const options = this.createOptions(typeof value, value)
 		const name = prettyfyStr(key).replace(' Attached', '').replace(' Enabled', '')
@@ -84,13 +89,13 @@ export class Actions {
 		}
 	}
 
-	createRenderActions(): void {
+	private createRenderActions(): void {
 		for (const [key, value] of Object.entries(renderInstance)) {
 			this.createAction(key, value, 'replay/render')
 		}
 	}
 
-	createPlaybackActions(): void {
+	private createPlaybackActions(): void {
 		for (const [key, value] of Object.entries(playbackInstance)) {
 			this.createAction(key, value, 'replay/playback')
 		}
