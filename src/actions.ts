@@ -1,21 +1,14 @@
 import LoLInstance from './'
-import { Variables } from './variables'
 import { renderInstance, playbackInstance } from './data'
 import type { CompanionActionDefinitions, SomeCompanionActionInputField } from '@companion-module/base'
 import { camelCaseToSnakeCase, prettyfyStr } from './utils'
-import { ReplayService } from './http'
 
 export class Actions {
 	private readonly instance: LoLInstance
 	public actions: CompanionActionDefinitions = {}
-	private readonly replayapi: ReplayService
-	private readonly variables: Variables
 
-	constructor(instance: LoLInstance, api: ReplayService, variables: Variables) {
+	constructor(instance: LoLInstance) {
 		this.instance = instance
-		this.replayapi = api
-		this.variables = variables
-
 		this.createRenderActions()
 		this.createPlaybackActions()
 	}
@@ -73,14 +66,13 @@ export class Actions {
 			name: typeof value === 'boolean' ? `Toggle/On/Off ${name}` : `Set ${name}`,
 			options,
 			callback: async ({ options }) => {
-				let newData
 				if (options.value === 'toggle') {
 					const currentValue = this.instance.getVariableValue(key)
-					newData = await this.replayapi.post(endpoint, {
+					this.instance.lolreplay?.post(endpoint, {
 						[key]: currentValue ? 'false' : 'true',
 					})
 				} else {
-					await this.replayapi.post(endpoint, {
+					await this.instance.lolreplay?.post(endpoint, {
 						[key]: options.value as string,
 					})
 				}

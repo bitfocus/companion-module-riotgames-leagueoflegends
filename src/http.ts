@@ -1,8 +1,6 @@
-import { Config } from './config'
 import LoLInstance from './'
 import https from 'node:https'
 import http from 'node:http'
-import { Variables } from './variables'
 import { InstanceStatus } from '@companion-module/base'
 import { convertObjectValues } from './utils'
 
@@ -11,13 +9,11 @@ export class ReplayService {
 	private ip: string
 	private port: number
 	private request: typeof https | typeof http
-	private variables: Variables | null
-	constructor(instance: LoLInstance, config: Config) {
-		this.ip = config.host
-		this.port = config.port
-		this.request = config.ssl ? https : http
+	constructor(instance: LoLInstance) {
+		this.ip = instance.config.host
+		this.port = instance.config.port
+		this.request = instance.config.ssl ? https : http
 		this.instance = instance
-		this.variables = instance.variables
 	}
 
 	async get(path: ReplayAPIPaths): Promise<Render | Playback | void> {
