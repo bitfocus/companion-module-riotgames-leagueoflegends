@@ -80,11 +80,10 @@ export class Actions {
 						[key]: currentValue ? 'false' : 'true',
 					})
 				} else {
-					newData = await this.replayapi.post(endpoint, {
+					await this.replayapi.post(endpoint, {
 						[key]: options.value as string,
 					})
 				}
-				if (newData) this.variables.UpdateVariable(newData)
 			},
 		}
 	}

@@ -2,20 +2,22 @@ import { Config } from './config'
 import LoLInstance from './'
 import https from 'node:https'
 import http from 'node:http'
+import { Variables } from './variables'
 import { InstanceStatus } from '@companion-module/base'
 import { convertObjectValues } from './utils'
 
-type ReplayAPIPaths = 'replay/playback' | 'replay/render'
 export class ReplayService {
 	private instance: LoLInstance
 	private ip: string
 	private port: number
 	private request: typeof https | typeof http
+	private variables: Variables | null
 	constructor(instance: LoLInstance, config: Config) {
 		this.ip = config.host
 		this.port = config.port
 		this.request = config.ssl ? https : http
 		this.instance = instance
+		this.variables = instance.variables
 	}
 
 	async get(path: ReplayAPIPaths): Promise<Render | Playback | void> {
@@ -44,7 +46,9 @@ export class ReplayService {
 					const responseTime = (Date.now() - startTime) / 1000 // Calculate the response time in seconds
 					// this.instance.log('info', `Response time: ${responseTime} ms`) // Log the response time
 					this.instance.updateStatus(InstanceStatus.Ok, 'Connected')
-					resolve(JSON.parse(all_data.slice(0, -1) + `,"responseTime":${responseTime}}`))
+					const newData = JSON.parse(all_data.slice(0, -1) + `,"responseTime":${responseTime}}`)
+					this.instance.variables?.UpdateVariable(newData)
+					resolve(newData as Render | Playback)
 				})
 			})
 			req.on('error', (e) => {
@@ -84,7 +88,9 @@ export class ReplayService {
 
 				res.on('end', () => {
 					// this.instance.log('debug', `received data from post: ${all_data}`)
-					resolve(JSON.parse(all_data))
+					const newData = JSON.parse(all_data)
+					this.instance.variables?.UpdateVariable(newData)
+					resolve(newData as Render | Playback)
 				})
 			})
 			req.on('error', (e) => {

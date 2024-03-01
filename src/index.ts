@@ -49,8 +49,7 @@ class LoLInstance extends InstanceBase<Config> {
 	}
 
 	private async fetchData(path: 'replay/render' | 'replay/playback'): Promise<void> {
-		const data = await this.lolreplay!.get(path)
-		if (data) this.variables?.UpdateVariable(data)
+		await this.lolreplay!.get(path)
 	}
 
 	async connectAPI(): Promise<void> {
