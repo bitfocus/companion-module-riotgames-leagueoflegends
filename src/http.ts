@@ -28,6 +28,7 @@ export class ReplayService {
 		return new Promise((resolve, reject) => {
 			let all_data = ''
 			const startTime = Date.now() // Record the start time
+			// this.instance.log('debug', `Sending request to ${options.hostname}:${options.port}${options.path}`)
 			const req = this.request.get(options, (res) => {
 				res.setEncoding('utf8')
 				res.on('data', (d) => {
@@ -43,7 +44,7 @@ export class ReplayService {
 					// this.instance.log('info', `Response time: ${responseTime} ms`) // Log the response time
 					this.instance.updateStatus(InstanceStatus.Ok, 'Connected')
 					const newData = JSON.parse(all_data.slice(0, -1) + `,"responseTime":${responseTime}}`)
-					this.instance.variables?.UpdateVariable(newData)
+					this.instance.data?.update(newData)
 					resolve(newData as Render | Playback)
 				})
 			})

@@ -71,6 +71,8 @@ interface Playback {
 	time: number
 }
 
+type PlaybackKeys = keyof Playback
+
 interface CameraPosition {
 	x: number
 	y: number

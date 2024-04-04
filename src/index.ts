@@ -5,6 +5,8 @@ import { Variables } from './variables'
 import { Actions } from './actions'
 import { ReplayService } from './http'
 import { setIntervalAsync, clearIntervalAsync, SetIntervalAsyncTimer } from 'set-interval-async'
+import { Feedbacks } from './feedbacks'
+import { Data } from './data'
 
 class LoLInstance extends InstanceBase<Config> {
 	constructor(internal: unknown) {
@@ -17,16 +19,22 @@ class LoLInstance extends InstanceBase<Config> {
 		ssl: true,
 	}
 	public apiInterval: SetIntervalAsyncTimer<unknown[]> | null = null
+
 	public variables: Variables | null = null
 	public actions: Actions | null = null
 	public lolreplay: ReplayService | null = null
+	public feedbacks: Feedbacks | null = null
+
+	public data: Data | null = null
 
 	public async init(config: Config): Promise<void> {
 		this.config = config
 		this.log('debug', `Process ID: ${process.pid}`)
+		this.data = new Data(this)
 		this.lolreplay = new ReplayService(this)
 		this.variables = new Variables(this)
 		this.actions = new Actions(this)
+		this.feedbacks = new Feedbacks(this)
 		this.updateInstance()
 	}
 
@@ -78,6 +86,7 @@ class LoLInstance extends InstanceBase<Config> {
 	private updateInstance(): void {
 		this.variables?.UpdateVariableDefinitions()
 		this.actions?.UpdateActionDefinitions()
+		this.feedbacks?.UpdateFeedbackDefinitions()
 
 		if (this.apiInterval) clearIntervalAsync(this.apiInterval)
 		if (!this.isValidIP(this.config.host)) {
