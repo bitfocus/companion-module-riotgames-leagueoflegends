@@ -7,6 +7,7 @@ import { ReplayService } from './http'
 import { setIntervalAsync, clearIntervalAsync, SetIntervalAsyncTimer } from 'set-interval-async'
 import { Feedbacks } from './feedbacks'
 import { Data } from './data'
+import { Presets } from './presets'
 
 class LoLInstance extends InstanceBase<Config> {
 	constructor(internal: unknown) {
@@ -24,6 +25,7 @@ class LoLInstance extends InstanceBase<Config> {
 	public actions: Actions | null = null
 	public lolreplay: ReplayService | null = null
 	public feedbacks: Feedbacks | null = null
+	public presets: Presets | null = null
 
 	public data: Data | null = null
 
@@ -35,6 +37,7 @@ class LoLInstance extends InstanceBase<Config> {
 		this.variables = new Variables(this)
 		this.actions = new Actions(this)
 		this.feedbacks = new Feedbacks(this)
+		this.presets = new Presets(this)
 		this.updateInstance()
 	}
 
