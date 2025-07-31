@@ -36,6 +36,7 @@ export const getConfigFields = (): SomeCompanionConfigField[] => {
 			label: 'Taget host',
 			width: 5,
 			regex: Regex.IP,
+			default: '127.0.0.1',
 		},
 		{
 			type: 'number',
